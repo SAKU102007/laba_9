@@ -73,15 +73,12 @@ void reverseLongestWordInFile(const char *fileName, int length) {
     for (int i = 0; i < length; i++) {
         if (fgets(input, sizeof(input), fp) != NULL) {
             int cur_length = 0;
-            int actual_length = 0;
             while (input[cur_length] != '\0' && input[cur_length] != '\n') {
-                if ((input[cur_length] & 0xC0) != 0x80)
-                    actual_length++;
                 cur_length++;
             }
+            if (max_length < cur_length) {
 
-            if (max_length < actual_length) {
-                max_length = actual_length;
+                max_length = cur_length;
                 max_position = ftell(fp) - cur_length - 1;
                 max_length_for_count = cur_length;
             }
