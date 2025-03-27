@@ -8,12 +8,11 @@ void fillFileWithWords(const char *fileName, int *length) {
         return;
     }
 
-    printf("Введите слова через enter\n"
-           "Не больше 99 букв в слове\n"
-           "Чтобы окончить ввод нажмите enter дважды:\n");
+    printf("\n\nВведите слова(до 99 символов)\n"
+           "Чтобы окончить ввод, нажмите enter дважды:\n");
 
     while (1) {
-        char input[100];
+        char input[1000];
 
         int i = 0;
         char c;
@@ -37,7 +36,7 @@ void fillFileWithWords(const char *fileName, int *length) {
 }
 
 // Функция для подсчёта количества слов в файле
-void countWordsInFile(const char *fileName, int length) {
+void countWordsInFile(const char *fileName) {
     FILE *fp = fopen(fileName, "r");
     if (fp == NULL) {
         perror("Error opening file for reading");
@@ -46,9 +45,20 @@ void countWordsInFile(const char *fileName, int length) {
 
     int number_of_words = 0;
     char input[100];
-    for (int i = 0; i < length; i++) {
-        if (fgets(input, sizeof(input), fp) != NULL)
-            number_of_words++;
+
+    while (fgets(input, sizeof(input), fp) != NULL) {
+        int i = 0;
+        while (input[i] != '\0')
+        {
+            while (input[i] == ' ' || input[i] == '\n')
+                i++;
+
+            if (input[i] != '\0' && input[i] != ' '&& input[i] != '\n') 
+                number_of_words++;
+
+            while (input[i] != '\0' && input[i] != ' ' && input[i] != '\n') 
+                i++;
+        }
     }
 
     printf("Количество слов в файле: %d\n", number_of_words);
@@ -64,69 +74,60 @@ void reverseLongestWordInFile(const char *fileName, int length) {
         return;
     }
 
-    char input[100] = "";
+    char word[100];
+    char longestWord[100] = "";
     int max_length = 0;
-    int max_position = 0;
-    int max_length_for_count;
+    long max_position = 0;
+
+    long current_position = ftell(fp);
 
     // Поиск самого длинного слова
-    for (int i = 0; i < length; i++) {
-        if (fgets(input, sizeof(input), fp) != NULL) {
-            int cur_length = 0;
-            while (input[cur_length] != '\0' && input[cur_length] != '\n') {
-                cur_length++;
+    while (fscanf(fp, "%99s", word) == 1) {
+        // int word_length = strlen(word);
+        int word_length = 0;
+        while (word[word_length] != '\0')  
+            word_length++;
+        
+        if (word_length > max_length) {
+            max_length = word_length;
+            int i = 0;
+            while (word[i] != '\0')
+            {
+                longestWord[i] = word[i];
+                i++;
             }
-            if (max_length < cur_length) {
-
-                max_length = cur_length;
-                max_position = ftell(fp) - cur_length - 1;
-                max_length_for_count = cur_length;
-            }
+            longestWord[i] = '\0';
+            max_position = current_position;
         }
+        
+        current_position = ftell(fp);
     }
 
-    printf("Самое длинное слово имеет %d символов\n", max_length);
-
-    // Перемещаем указатель файла на начало самого длинного слова
-    fseek(fp, max_position, SEEK_SET);
-
-    // Читаем самое длинное слово
-    char temp[100];
-    fgets(temp, sizeof(temp), fp);
-    printf("Самое длинное слово: ");
-    int q = 0;
-    while (temp[q] != '\0' && temp[q] != '\n') {
-        putchar(temp[q]);
-        q++;
+    if (max_length == 0) {
+        printf("Файл не содержит слов.\n");
+        fclose(fp);
+        return;
     }
-    printf("\n");
 
-    // Перемещаем указатель файла на начало самого длинного слова
-    fseek(fp, max_position, SEEK_SET);
-    fgets(input, sizeof(input), fp);
+    printf("Самое длинное слово: %s (%d символов)\n", longestWord, max_length);
 
     // Реверс самого длинного слова
-    for (int i = 0; i < (max_length_for_count - 0) / 2; i++) {
-        char temp = input[max_length_for_count - 1 - i];
-        input[max_length_for_count - 1 - i] = input[i];
-        input[i] = temp;
+    for (int i = 0, j = max_length - 1; i < j; i++, j--) {
+        char temp = longestWord[i];
+        longestWord[i] = longestWord[j];
+        longestWord[j] = temp;
     }
 
-    // Вывод реверсированного слова
-    printf("Самое длинное слово после реверса: ");
-    q = 0;
-    while (input[q] != '\0' && input[q] != '\n') {
-        putchar(input[q]);
-        q++;
-    }
-    printf("\n");
+    printf("Самое длинное слово после реверса: %s\n", longestWord);
 
-    // Записываем реверсированное слово обратно в файл
+    // Запись реверсированного слова обратно в файл
     fseek(fp, max_position, SEEK_SET);
-    fputs(input, fp);
+    fprintf(fp, "\n%s", longestWord);
 
     fclose(fp);
 }
+
+
 
 // Функция для вывода содержимого файла
 void printFileContents(const char *fileName, int length) {
@@ -137,7 +138,7 @@ void printFileContents(const char *fileName, int length) {
     }
 
     printf("Вывод содержимого файла: \n");
-    char input[100];
+    char input[1000];
     for (int i = 0; i < length; i++) {
         if (fgets(input, sizeof(input), fp) != NULL)
             printf("%s", input);

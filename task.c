@@ -9,31 +9,40 @@ int main(int argc, char *argv[]) {
     }
 
     const char *fileName = argv[1];
-    int length = 0;
 
-    // Заполнение файла словами с клавиатуры
-    fillFileWithWords(fileName, &length);
+    while (1)
+    {
+        int length = 0;
 
-    printf("Введите выбор выполняемого задания:\n"
-           "1 - Посчитать количество слов в файле.\n"
-           "2 - Сделать реверс самого длинного слова в файле.\n");
-    int choice;
-    scanf("%d", &choice);
+        // Заполнение файла словами с клавиатуры
+        fillFileWithWords(fileName, &length);
 
-    switch (choice) {
+        printf("Введите выбор выполняемого задания:\n"
+            "0 - Выход из программмы.\n"
+            "1 - Посчитать количество слов в файле.\n"
+            "2 - Сделать реверс самого длинного слова в файле.\n");
+        int choice;
+        scanf("%d", &choice);
+        while (getchar() != '\n');
+
+        switch (choice) {
+        case 0 :
+            printf("Вы вышли из программы.\n");
+            return 0;
         case 1:
-            countWordsInFile(fileName, length);
+            countWordsInFile(fileName);
             break;
         case 2:
             reverseLongestWordInFile(fileName, length);
             break;
         default:
-            printf("Неверный выбор! Допустимые значения: 1, 2.\n");
-            return 1;
-    }
+            printf("Неверный выбор! Допустимые значения: 0, 1, 2.\n");
+            break;
+        }
 
-    // Вывод содержимого файла
-    printFileContents(fileName, length);
+        // Вывод содержимого файла
+        printFileContents(fileName, length);
+    }
 
     return 0;
 }
